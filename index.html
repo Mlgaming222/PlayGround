@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+  <meta name="theme-color" content="#030812">
+  <meta name="description" content="Neon Strikers — a 3D rocket-powered car soccer game where every cosmetic item changes your physics.">
+  <title>Neon Strikers — Rocket Soccer</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%2318d7ff' d='M32 2 58 17v30L32 62 6 47V17z'/%3E%3Cpath fill='%23040a14' d='m20 18 24 14-24 14z'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+  <div id="app">
+    <canvas id="scene" aria-label="Neon Strikers 3D arena"></canvas>
+    <div class="vignette" aria-hidden="true"></div>
+    <div class="scanlines" aria-hidden="true"></div>
+
+    <!-- BOOT -->
+    <div id="loader" class="loader">
+      <div class="loader-mark">
+        <span>N</span><span>S</span>
+      </div>
+      <div class="loader-title">NEON STRIKERS</div>
+      <div class="loader-bar"><i id="loadBar"></i></div>
+      <div class="loader-status" id="loadStatus">CALIBRATING ARENA</div>
+    </div>
+
+    <!-- MENU / GARAGE -->
+    <section id="menu" class="screen menu hidden" aria-label="Main menu">
+      <header class="menu-top">
+        <div class="brand">
+          <div class="brand-mark"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 3 58 18v28L32 61 6 46V18z" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="m20 18 24 14-24 14z" fill="currentColor"/></svg></div>
+          <div class="brand-text">
+            <h1>NEON<span>STRIKERS</span></h1>
+            <p>ROCKET SOCCER <b>//</b> COSMETIC PHYSICS</p>
+          </div>
+        </div>
+        <div class="top-actions">
+          <div class="season-chip"><i></i> SEASON 01 <span>LIVE</span></div>
+          <button id="soundBtn" class="icon-btn" type="button" aria-label="Toggle sound" title="Sound">
+            <svg class="sound-on" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4zm12.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4zm-2.5-8v2.1a7 7 0 0 1 0 11.8V20a9 9 0 0 0 0-16z"/></svg>
+            <svg class="sound-off" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4zm15.6.3-1.4-1.4L16 10.1l-2.2-2.2-1.4 1.4 2.2 2.2-2.2 2.2 1.4 1.4 2.2-2.2 2.2 2.2 1.4-1.4-2.2-2.2z"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <div class="menu-main">
+        <section class="garage glass" aria-label="Garage">
+          <div class="garage-head">
+            <div>
+              <span class="eyebrow">LOADOUT LAB / 01</span>
+              <h2>GARAGE</h2>
+            </div>
+            <div class="garage-note"><span class="pulse-dot"></span>EVERY ITEM ALTERS YOUR PHYSICS</div>
+          </div>
+          <nav class="tabs" id="tabs" aria-label="Cosmetic category"></nav>
+          <div class="garage-grid">
+            <div class="items" id="itemGrid"></div>
+            <aside class="telemetry" aria-label="Build telemetry">
+              <div class="telemetry-head">
+                <span class="eyebrow">BUILD TELEMETRY</span>
+                <span id="buildClass">BALANCED</span>
+              </div>
+              <div id="statList" class="stat-list"></div>
+              <div class="loadout-line">
+                <span id="loadoutName">OCTANE / APEX / STANDARD / HALO</span>
+              </div>
+              <div id="tradeoff" class="tradeoff"></div>
+            </aside>
+          </div>
+        </section>
+
+        <div class="hero-side">
+          <div class="hero-card glass">
+            <div class="hero-card-top">
+              <span class="eyebrow">PILOT // MLG-222</span>
+              <span class="hero-rank"><i></i> DIAMOND III</span>
+            </div>
+            <h2 id="carName">OCTANE</h2>
+            <p id="carBlurb">The all-rounder. No weaknesses, no wasted mass.</p>
+            <div class="hero-tags" id="heroTags"></div>
+            <div class="setup-row">
+              <span class="setup-label">AI DIFFICULTY</span>
+              <div class="difficulty" id="difficulty" role="group" aria-label="AI difficulty">
+                <button type="button" data-diff="rookie">ROOKIE</button>
+                <button type="button" data-diff="pro" class="active">PRO</button>
+                <button type="button" data-diff="allstar">ALL-STAR</button>
+              </div>
+            </div>
+            <button id="playBtn" class="play-btn" type="button">
+              <span class="play-icon"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+              <span class="play-copy"><b>ENTER THE ARENA</b><small>1 V 1 · 3:00 · OVERTIME</small></span>
+              <span class="play-shine"></span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <footer class="menu-footer">
+        <div class="controls-strip">
+          <div><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd><span>DRIVE</span></div>
+          <div><kbd class="wide">SPACE</kbd><span>JUMP ×2</span></div>
+          <div><kbd class="wide">SHIFT</kbd><span>BOOST</span></div>
+          <div><kbd>Q</kbd><span>DRIFT</span></div>
+          <div><kbd>C</kbd><span>BALL CAM</span></div>
+        </div>
+        <div class="footer-note">COSMETICS ARE NOT COSMETIC.</div>
+      </footer>
+    </section>
+
+    <!-- MATCH HUD -->
+    <section id="hud" class="hud hidden" aria-label="Match HUD">
+      <div class="score-wrap">
+        <div class="scoreboard">
+          <div class="team blue">
+            <span class="team-tag">BLUE</span>
+            <b id="scoreBlue">0</b>
+          </div>
+          <div class="clock-wrap">
+            <span id="matchState">REGULATION</span>
+            <strong id="clock">3:00</strong>
+          </div>
+          <div class="team orange">
+            <b id="scoreOrange">0</b>
+            <span class="team-tag">ORANGE</span>
+          </div>
+        </div>
+        <div class="objective" id="objective">FIRST TO THE BALL. LAST TO LEAVE.</div>
+      </div>
+
+      <div class="top-right">
+        <div class="cam-chip" id="camChip"><span></span>BALL CAM</div>
+        <button id="pauseBtn" class="icon-btn small" type="button" aria-label="Pause">
+          <svg viewBox="0 0 24 24"><path d="M7 5h4v14H7zm6 0h4v14h-4z"/></svg>
+        </button>
+      </div>
+
+      <div class="boost-hud">
+        <div class="boost-label"><span>BOOST</span><b id="boostValue">34</b></div>
+        <div class="boost-track"><i id="boostFill"></i><span class="boost-ticks"></span></div>
+        <div class="boost-sub"><span id="boostItem">STANDARD CORE</span><span id="regenTag"></span></div>
+      </div>
+
+      <div class="speed-hud">
+        <div class="speed-num"><b id="speed">000</b><span>KPH</span></div>
+        <div class="speed-foot"><span>SUPERSONIC</span><i id="sonicBar"></i></div>
+      </div>
+
+      <div class="ability-hud">
+        <div id="jumpPip" class="pip active"><span>JUMP</span></div>
+        <div id="dodgePip" class="pip active"><span>AIR FLIP</span></div>
+        <div id="driftPip" class="pip"><span>DRIFT</span></div>
+      </div>
+
+      <div class="center-msg" id="centerMsg" aria-live="assertive"></div>
+      <div class="goal-banner" id="goalBanner">
+        <span id="goalKicker">BLUE SCORES</span>
+        <b id="goalName">OCTANE</b>
+        <i></i>
+      </div>
+      <div class="toast" id="toast"></div>
+
+      <div class="touch-ui" id="touchUI">
+        <div class="stick-base" id="stickBase"><div class="stick-ring"></div><div class="stick-knob" id="stickKnob"></div><span>DRIVE</span></div>
+        <div class="touch-buttons">
+          <button id="touchCam" class="tbtn cam" type="button">CAM</button>
+          <button id="touchDrift" class="tbtn drift" type="button">DRIFT</button>
+          <button id="touchJump" class="tbtn jump" type="button">JUMP<small>×2</small></button>
+          <button id="touchBoost" class="tbtn boost" type="button">BOOST</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAUSE -->
+    <div id="pause" class="modal-wrap hidden">
+      <div class="modal glass">
+        <span class="eyebrow">MATCH SUSPENDED</span>
+        <h2>PAUSED</h2>
+        <div class="pause-score"><span class="blue">BLUE <b id="pauseBlue">0</b></span><i>VS</i><span class="orange"><b id="pauseOrange">0</b> ORANGE</span></div>
+        <button class="modal-btn primary" id="resumeBtn" type="button">RESUME MATCH</button>
+        <button class="modal-btn" id="restartBtn" type="button">RESTART</button>
+        <button class="modal-btn ghost" id="quitBtn" type="button">BACK TO GARAGE</button>
+        <div class="modal-foot">ESC TO RESUME · AUDIO SYNTHESIZED IN-BROWSER</div>
+      </div>
+    </div>
+
+    <!-- END -->
+    <div id="endScreen" class="modal-wrap hidden">
+      <div class="modal end-modal glass">
+        <span class="eyebrow" id="endEyebrow">MATCH COMPLETE</span>
+        <h2 id="endTitle">VICTORY</h2>
+        <div class="end-score"><span id="endBlue">0</span><i>—</i><span id="endOrange">0</span></div>
+        <div class="end-stats" id="endStats"></div>
+        <div class="end-actions">
+          <button class="modal-btn primary" id="rematchBtn" type="button">REMATCH</button>
+          <button class="modal-btn ghost" id="endGarageBtn" type="button">GARAGE</button>
+        </div>
+        <div class="modal-foot" id="endFoot">THE ARENA REMEMBERS.</div>
+      </div>
+    </div>
+
+    <div id="rotateHint" class="rotate-hint hidden">Rotate your device for the full stadium view</div>
+  </div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
